@@ -1,0 +1,10 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources xmlns:tools="http://schemas.android.com/tools" tools:keep="@string/firebase_database_url,@string/gcm_defaultSenderId,@string/google_storage_bucket,@string/project_id,@string/google_api_key,@string/google_crash_reporting_api_key,@string/google_app_id">
+  <string name="firebase_database_url" translatable="false">https://pf-jd-ruleta-default-rtdb.firebaseio.com</string>
+  <string name="gcm_defaultSenderId" translatable="false">358028021538</string>
+  <string name="google_storage_bucket" translatable="false">pf-jd-ruleta.firebasestorage.app</string>
+  <string name="project_id" translatable="false">pf-jd-ruleta</string>
+  <string name="google_api_key" translatable="false">AIzaSyCmtjpAvmeyIo57KCdIeSLwJ7efW8ATfGw</string>
+  <string name="google_crash_reporting_api_key" translatable="false">AIzaSyCmtjpAvmeyIo57KCdIeSLwJ7efW8ATfGw</string>
+  <string name="google_app_id" translatable="false">1:358028021538:android:02dc8770107b36fe521f7b</string>
+</resources>
