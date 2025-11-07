@@ -1,12 +1,19 @@
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using Firebase.Database;
+using System.Threading.Tasks; 
 
 public class SceneChanger : MonoBehaviour
 {
-    public string sceneName = "Juego"; // Nombre exacto de la escena que quieres cargar
-
-    public void LoadGameScene()
+    public void LoadGameScene(string sceneName)
     {
-        SceneManager.LoadScene(sceneName);
+        if (SesionEstatica.Saldo != 0 || !string.IsNullOrEmpty(SesionEstatica.UserId))
+        {
+            SceneManager.LoadScene(sceneName);
+        }
+        else
+        {
+            Debug.LogWarning("No tienes dinero suficiente para jugar");
+        }
     }
 }

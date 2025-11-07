@@ -12,6 +12,7 @@ public class GameManager : MonoBehaviour
     public Button hitBtn;
     public Button standBtn;
     public Button betBtn;
+    public Button salir;
 
     private int standClicks = 0;
 
@@ -39,6 +40,7 @@ public class GameManager : MonoBehaviour
         hitBtn.onClick.AddListener(() => HitClicked());
         standBtn.onClick.AddListener(() => StandClicked());
         betBtn.onClick.AddListener(() => BetClicked());
+        salir.onClick.AddListener(() => SalirClicked());
     }
 
     private void DealClicked()
@@ -54,8 +56,8 @@ public class GameManager : MonoBehaviour
         playerScript.StartHand();
         dealerScript.StartHand();
         // Update the scores displayed
-        scoreText.text = "Hand: " + playerScript.handValue.ToString();
-        dealerScoreText.text = "Hand: " + dealerScript.handValue.ToString();
+        scoreText.text = "Mano: " + playerScript.handValue.ToString();
+        dealerScoreText.text = "Mano Dealer: " + dealerScript.handValue.ToString();
         // Place card back on dealer card, hide card
         hideCard.GetComponent<Renderer>().enabled = true;
         // Adjust buttons visibility
@@ -65,10 +67,15 @@ public class GameManager : MonoBehaviour
         standBtnText.text = "Stand";
         // Set standard pot size
         pot = 40;
-        betsText.text = "Bets: $" + pot.ToString();
+        betsText.text = "Apuesta: $" + pot.ToString();
         playerScript.AdjustMoney(-20);
         cashText.text = "$" + playerScript.GetMoney().ToString();
 
+    }
+
+    private void SalirClicked()
+    {
+        playerScript.SaveMoneyToFirebase();
     }
 
     private void HitClicked()
@@ -77,7 +84,7 @@ public class GameManager : MonoBehaviour
         if (playerScript.cardIndex <= 10)
         {
             playerScript.GetCard();
-            scoreText.text = "Hand: " + playerScript.handValue.ToString();
+            scoreText.text = "Mano: " + playerScript.handValue.ToString();
             if (playerScript.handValue > 20) RoundOver();
         }
     }
@@ -95,7 +102,7 @@ public class GameManager : MonoBehaviour
         while (dealerScript.handValue < 16 && dealerScript.cardIndex < 10)
         {
             dealerScript.GetCard();
-            dealerScoreText.text = "Hand: " + dealerScript.handValue.ToString();
+            dealerScoreText.text = "Mano: " + dealerScript.handValue.ToString();
             if (dealerScript.handValue > 20) RoundOver();
         }
     }
@@ -114,24 +121,24 @@ public class GameManager : MonoBehaviour
         // All bust, bets returned
         if (playerBust && dealerBust)
         {
-            mainText.text = "All Bust: Bets returned";
+            mainText.text = "EMPATE";
             playerScript.AdjustMoney(pot / 2);
         }
         // if player busts, dealer didnt, or if dealer has more points, dealer wins
         else if (playerBust || (!dealerBust && dealerScript.handValue > playerScript.handValue))
         {
-            mainText.text = "Dealer wins!";
+            mainText.text = "PERDISTE!";
         }
         // if dealer busts, player didnt, or player has more points, player wins
         else if (dealerBust || playerScript.handValue > dealerScript.handValue)
         {
-            mainText.text = "You win!";
+            mainText.text = "GANASTE!";
             playerScript.AdjustMoney(pot);
         }
         //Check for tie, return bets
         else if (playerScript.handValue == dealerScript.handValue)
         {
-            mainText.text = "Push: Bets returned";
+            mainText.text = "EMPATE";
             playerScript.AdjustMoney(pot / 2);
         }
         else
@@ -160,6 +167,6 @@ public class GameManager : MonoBehaviour
         playerScript.AdjustMoney(-intBet);
         cashText.text = "$" + playerScript.GetMoney().ToString();
         pot += (intBet * 2);
-        betsText.text = "Bets: $" + pot.ToString();
+        betsText.text = "Apuesta: $" + pot.ToString();
     }
 }

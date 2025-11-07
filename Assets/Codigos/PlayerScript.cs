@@ -1,6 +1,8 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using Firebase.Database;
+using System.Threading.Tasks; 
 
 public class PlayerScript : MonoBehaviour
 {
@@ -14,7 +16,7 @@ public class PlayerScript : MonoBehaviour
     public int handValue = 0;
 
     // Betting money
-    private int money = 1000;
+    private int money;
 
     // Array of card objects on table
     public GameObject[] hand;
@@ -27,6 +29,42 @@ public class PlayerScript : MonoBehaviour
     {
         GetCard();
         GetCard();
+    }
+
+    void Start()
+    {
+        // Carga el dinero inicial desde la clase estática Sesion
+        if (SesionEstatica.Saldo != 0 || !string.IsNullOrEmpty(SesionEstatica.UserId))
+        {
+            money = SesionEstatica.Saldo;
+            Debug.Log($"Saldo cargado: {money}");
+        }
+        else
+        {
+            // Fallback por si se carga la escena de juego sin pasar por el login
+            Debug.LogWarning("No tienes dinero suficiente para jugar");
+            money = 0; // O puedes manejar esto enviándolo de vuelta al menú
+        }
+    }
+
+        public void SaveMoneyToFirebase()
+    {
+        // 1. Actualiza el valor en la clase estática
+        SesionEstatica.Saldo = money;
+
+        // 2. Guarda el valor en Firebase
+        if (SesionEstatica.DBreference != null && !string.IsNullOrEmpty(SesionEstatica.UserId))
+        {
+            Debug.Log($"Guardando saldo final: {money} para Usuario: {SesionEstatica.UserId}");
+
+            // Usamos SetValueAsync para guardar el dato.
+            Task DBTask = SesionEstatica.DBreference.Child("users").Child(SesionEstatica.UserId).Child("saldo").SetValueAsync(money);
+
+        }
+        else
+        {
+            Debug.LogError("Error al guardar: Sesion.DBreference o Sesion.UserId no están inicializados.");
+        }
     }
 
     // Add a hand to the player/dealer's hand

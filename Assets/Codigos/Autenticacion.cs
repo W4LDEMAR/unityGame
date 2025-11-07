@@ -5,6 +5,7 @@ using Firebase.Auth;
 using TMPro;
 using System.Threading.Tasks;
 using Firebase.Database;
+using System;
 //SignOutButton();
 
 public static class Sesion
@@ -85,6 +86,7 @@ public class Autenticacion : MonoBehaviour
         //Set the authentication instance object
         auth = FirebaseAuth.DefaultInstance;
         DBreference = FirebaseDatabase.DefaultInstance.RootReference;
+        SesionEstatica.DBreference = DBreference;
     }
 
     public void ClearLoginFeilds()
@@ -130,6 +132,7 @@ public class Autenticacion : MonoBehaviour
         auth.SignOut();
         ClearRegisterFeilds();
         ClearLoginFeilds();
+        Debug.LogFormat("User signed out successfully");
         loginPanel.SetActive(true);   // Muetsra el panel de login
         mainPanel.SetActive(false);     // Oculta el panel principal
     }
@@ -201,6 +204,9 @@ public class Autenticacion : MonoBehaviour
             User = FirebaseAuth.DefaultInstance.CurrentUser;
             Debug.LogFormat("User signed in successfully: {0} ({1})", User.DisplayName, User.Email);
             warningLoginText.text = "";
+
+            SesionEstatica.User = User;
+            SesionEstatica.UserId = User.UserId;
 
             StartCoroutine(LoadSaldo());
 
@@ -442,7 +448,7 @@ public class Autenticacion : MonoBehaviour
 
     private IEnumerator UpdateSaldo(int _saldo)
     {
-        //Set the currently logged in user xp
+        //Set the currently logged in user saldo
         Task DBTask = DBreference.Child("users").Child(User.UserId).Child("saldo").SetValueAsync(_saldo);
 
         yield return new WaitUntil(predicate: () => DBTask.IsCompleted);
@@ -479,6 +485,7 @@ public class Autenticacion : MonoBehaviour
             DataSnapshot snapshot = DBTask.Result;
 
             Saldo.text = snapshot.Child("saldo").Value.ToString();
+            SesionEstatica.Saldo = int.Parse(snapshot.Child("saldo").Value.ToString());
         }
     }
 
@@ -503,6 +510,7 @@ public class Autenticacion : MonoBehaviour
         {
             // Actualizar UI
             Saldo.text = (int.Parse(Saldo.text) + _saldo).ToString();
+            SesionEstatica.Saldo = int.Parse(Saldo.text) + _saldo;
             StartCoroutine(UpdateSaldo(int.Parse(Saldo.text)));
             Debug.Log("Depósito realizado con éxito");
         }
@@ -515,7 +523,7 @@ public class Autenticacion : MonoBehaviour
         Task<DataSnapshot> transactionTask = reference.RunTransaction(mutableData =>
         {
             // Obtener saldo actual (0 si no existe)
-            int saldoActual = mutableData.Value != null ? int.Parse(mutableData.Value.ToString()) : 0;
+            int saldoActual = Convert.ToInt32(mutableData.Value);
 
             // Validar si el retiro es posible
             if (_saldoARetirar > saldoActual)
@@ -528,6 +536,7 @@ public class Autenticacion : MonoBehaviour
 
             // Restar el monto
             mutableData.Value = saldoActual - _saldoARetirar;
+            SesionEstatica.Saldo = int.Parse(Saldo.text) - _saldoARetirar;
             return TransactionResult.Success(mutableData);
         });
 
